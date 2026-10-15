@@ -361,7 +361,8 @@
   .foot { max-width: 1150px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 2rem 3rem; align-items: center; }
   .f-brand .logo { font-size: 2.2rem; }
   .f-brand p { margin-top: .3rem; color: #CDBFA8; font-weight: 600; }
-  .f-ca { grid-column: 1; }
+  .f-ca { grid-column: 1; min-width: 0; }
+  .plate { min-width: 0; }
   .f-ca .plate { max-width: 560px; }
   .f-side { display: grid; gap: 1rem; justify-items: end; }
   .f-social { display: flex; gap: .7rem; }
@@ -393,6 +394,8 @@
     .hero-art { border-left: none; border-top: 4px solid var(--ink); min-height: 0; height: 100vw; max-height: 520px; }
     .sheet-body { grid-template-columns: 1fr; }
     .mugshot { max-width: 220px; margin: 0 auto; width: 100%; }
+    .slots { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; }
+    .slot { font-size: 1.7rem; border-radius: 10px; }
     .buy .cards { grid-template-columns: 1fr; max-width: 360px; }
     .buy .tcard:nth-child(2) { margin-top: 0; }
     .room { grid-template-columns: 1fr; }
@@ -414,7 +417,7 @@
     .chain-band { height: 206px; margin-bottom: -40px; }
     .tiles { grid-template-columns: 1fr; max-width: 420px; }
     .tile { min-height: 0; transform: none !important; }
-    .foot { grid-template-columns: 1fr; text-align: center; }
+    .foot { grid-template-columns: minmax(0, 1fr); text-align: center; }
     .f-side { justify-items: center; }
     .f-ca .plate { margin: 0 auto; }
   }
