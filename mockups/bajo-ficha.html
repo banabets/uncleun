@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Under the Sheet</title>
+<link rel="icon" href="../public/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #FFF6E6; --red: #EF3B36; --gold: #F6C431; --gold-dark: #C8901A; --mint: #A3CFC2; --mint-dark: #2FB59A; --pink: #FF9EC1; --ink: #2A1A14; --lilac: #B69CFF; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Fredoka', sans-serif; padding: 40px 16px 80px; }
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-family: 'Bungee'; font-weight: 400; font-size: clamp(28px, 5vw, 44px); }
+  header h1 span { color: var(--red); }
+  header p { font-family: 'Caveat'; font-size: 26px; color: var(--red); }
+  .grid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 580px), 1fr)); gap: 48px 40px; }
+  .opt > .lbl { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-family: 'Bungee'; font-size: 18px; }
+  .opt > .lbl b { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--ink); color: var(--gold); font-weight: 400; }
+  .opt > .lbl small { font-family: 'Caveat'; font-size: 22px; color: var(--red); }
+  .opt.fav > .lbl::after { content: '★ mi favorita'; font-family: 'Fredoka'; font-weight: 700; font-size: 13px; background: var(--gold); border: 2.5px solid var(--ink); border-radius: 999px; padding: 2px 10px; }
+
+  /* a stub of the real character sheet's bottom, for context */
+  .stub { background: #fff; border: 4px solid var(--ink); border-top: 0; border-radius: 0 0 30px 30px; box-shadow: 0 12px 0 var(--ink); padding: 14px 22px 20px; transform: rotate(-1.5deg); margin-bottom: 34px; }
+  .stub h4 { font-family: 'Bungee'; font-weight: 400; font-size: 14px; margin-bottom: 10px; }
+  .stub .slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .stub .slots i { aspect-ratio: 1; background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; display: grid; place-items: center; font-style: normal; font-size: 30px; }
+  .stage { min-height: 200px; }
+
+  /* 1 · quest log */
+  .quest { background: #FFF1C7; border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 8px 0 var(--ink); transform: rotate(1deg); overflow: hidden; }
+  .quest .qh { display: flex; justify-content: space-between; align-items: center; background: var(--gold); border-bottom: 4px solid var(--ink); padding: 10px 18px; font-family: 'Bungee'; font-size: 15px; }
+  .quest .qh span:last-child { font-family: 'Fredoka'; font-weight: 700; font-size: 13px; background: #fff; border: 2.5px solid var(--ink); border-radius: 999px; padding: 1px 10px; }
+  .quest ul { list-style: none; padding: 12px 18px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+  .quest li { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; cursor: pointer; }
+  .quest li i { flex: none; width: 26px; height: 26px; border: 3px solid var(--ink); border-radius: 8px; background: #fff; display: grid; place-items: center; font-style: normal; font-size: 15px; }
+  .quest li.done i { background: var(--mint); }
+  .quest li.fail i { background: var(--red); color: #fff; }
+  .quest li small { font-family: 'Caveat'; font-size: 19px; color: var(--red); font-weight: 700; }
+  .quest li.done span { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .quest .xp { margin: 0 18px 14px; height: 16px; border: 3px solid var(--ink); border-radius: 99px; background: #fff; overflow: hidden; }
+  .quest .xp b { display: block; height: 100%; width: 75%; background: repeating-linear-gradient(45deg, var(--gold) 0 8px, #ffd95a 8px 16px); border-right: 3px solid var(--ink); }
+
+  /* 2 · now playing */
+  .np { display: flex; align-items: center; gap: 16px; background: #1c1730; color: var(--cream); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 8px 0 var(--ink); padding: 16px 18px; transform: rotate(1deg); text-decoration: none; position: relative; overflow: hidden; }
+  .np::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px); pointer-events: none; }
+  .np .cover { flex: none; width: 110px; aspect-ratio: 1; border-radius: 12px; border: 3px solid var(--gold); background: url(../public/new6.webp) 60% 40% / 190%; box-shadow: 0 0 18px rgba(90,140,255,.6); }
+  .np .k { font-size: 12px; font-weight: 700; letter-spacing: .12em; color: #8fe3d1; display: flex; align-items: center; gap: 6px; }
+  .np .k::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #43f08a; box-shadow: 0 0 8px #43f08a; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  .np .t { font-family: 'Bungee'; font-size: 22px; line-height: 1.1; margin: 4px 0; }
+  .np .t em { font-style: normal; color: var(--red); }
+  .np .meta { font-size: 14px; opacity: .8; }
+  .np .bar { margin-top: 10px; height: 8px; border-radius: 9px; background: rgba(255,255,255,.15); overflow: hidden; }
+  .np .bar b { display: block; height: 100%; width: 68%; background: linear-gradient(90deg, var(--pink), var(--gold)); }
+  .np .go { margin-left: auto; flex: none; align-self: flex-end; font: 700 13px 'Fredoka'; background: var(--gold); color: var(--ink); border: 3px solid var(--ink); border-radius: 999px; padding: 6px 12px; }
+
+  /* 3 · mood chart */
+  .mood { background: #fff; border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 8px 0 var(--ink); padding: 14px 18px 12px; transform: rotate(1deg); }
+  .mood .mh { display: flex; justify-content: space-between; align-items: baseline; }
+  .mood .mh b { font-family: 'Bungee'; font-weight: 400; font-size: 16px; }
+  .mood .mh span { font-family: 'Bungee'; font-size: 14px; color: var(--mint-dark); }
+  .mood svg { display: block; width: 100%; height: 110px; margin: 6px 0 4px; }
+  .mood .line { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw 3s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .mood .foot { display: flex; justify-content: space-between; font-family: 'Caveat'; font-size: 20px; color: var(--red); }
+
+  /* 4 · reviews */
+  .revs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rev { background: #fff; border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 7px 0 var(--ink); padding: 14px 16px; }
+  .rev:nth-child(1) { transform: rotate(-2deg); background: #E3F4EF; } .rev:nth-child(2) { transform: rotate(2deg) translateY(10px); background: #FFE3EE; }
+  .rev .st { color: var(--gold-dark); font-size: 18px; letter-spacing: 2px; -webkit-text-stroke: .6px var(--ink); }
+  .rev p { font-weight: 600; font-size: 16px; line-height: 1.3; margin: 6px 0 10px; }
+  .rev .who { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .rev .who i { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; font-style: normal; background: var(--gold); }
+  .rev .who small { display: block; font-weight: 500; opacity: .6; }
+
+  /* 5 · days without selling */
+  .days { background: #2E7D5B; border: 5px solid var(--ink); border-radius: 18px; box-shadow: 0 8px 0 var(--ink); padding: 16px 18px; color: #fff; text-align: center; transform: rotate(1deg); position: relative; }
+  .days::before, .days::after { content: ''; position: absolute; top: 10px; width: 12px; height: 12px; border-radius: 50%; background: #c9c9c9; border: 3px solid var(--ink); }
+  .days::before { left: 10px; } .days::after { right: 10px; }
+  .days .t1 { font-family: 'Bungee'; font-size: 17px; letter-spacing: .04em; }
+  .days .num { display: inline-flex; gap: 6px; margin: 10px 0 8px; }
+  .days .num span { font-family: 'Bungee'; font-size: 46px; line-height: 1; width: 50px; padding: 6px 0; background: #fff; color: var(--ink); border: 4px solid var(--ink); border-radius: 10px; box-shadow: inset 0 -6px 0 #ddd; }
+  .days .t2 { font-family: 'Caveat'; font-size: 22px; color: #FFE680; }
+  .days .rec { position: absolute; right: -14px; bottom: -18px; background: var(--red); border: 3.5px solid var(--ink); border-radius: 12px; padding: 3px 10px; font-family: 'Bungee'; font-size: 13px; transform: rotate(-6deg); box-shadow: 0 4px 0 var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Under the <span>Character Sheet</span></h1>
+  <p>5 ideas, shown under the sheet's inventory like on the real page</p>
+</header>
+
+<div class="grid">
+
+  <section class="opt fav">
+    <div class="lbl"><b>1</b>Quest log <small>misiones del día</small></div>
+    <div class="stub"><h4>Inventory</h4><div class="slots"><i>🥼</i><i>❤️</i><i>🔗</i><i>🍾</i><i>🥞</i></div></div>
+    <div class="stage">
+      <div class="quest">
+        <div class="qh"><span>📜 Daily quests</span><span>3 / 4</span></div>
+        <ul>
+          <li class="fail"><i>✕</i><span>Wake up early <small>(failed)</small></span></li>
+          <li class="done"><i>✓</i><span>Buy the dip</span></li>
+          <li><i></i><span>Sell <small>(never)</small></span></li>
+          <li class="done"><i>✓</i><span>Nap</span></li>
+        </ul>
+        <div class="xp"><b></b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt">
+    <div class="lbl"><b>2</b>Now playing <small>conecta con el cuarto</small></div>
+    <div class="stub"><h4>Inventory</h4><div class="slots"><i>🥼</i><i>❤️</i><i>🔗</i><i>🍾</i><i>🥞</i></div></div>
+    <div class="stage">
+      <a class="np" href="uncle-room.html">
+        <span class="cover"></span>
+        <span style="flex:1;min-width:0">
+          <span class="k">NOW PLAYING</span>
+          <span class="t" style="display:block">Bull Run <em>(hard mode)</em></span>
+          <span class="meta">4,200 hrs played · never paused</span>
+          <span class="bar" style="display:block"><b></b></span>
+        </span>
+        <span class="go">Join →</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="opt">
+    <div class="lbl"><b>3</b>Uncle's mood chart <small>chiste de cripto</small></div>
+    <div class="stub"><h4>Inventory</h4><div class="slots"><i>🥼</i><i>❤️</i><i>🔗</i><i>🍾</i><i>🥞</i></div></div>
+    <div class="stage">
+      <div class="mood">
+        <div class="mh"><b>📈 Uncle's mood</b><span>● STABLE</span></div>
+        <svg viewBox="0 0 520 110" preserveAspectRatio="none">
+          <g stroke="#eee" stroke-width="2"><line x1="0" y1="25" x2="520" y2="25"/><line x1="0" y1="55" x2="520" y2="55"/><line x1="0" y1="85" x2="520" y2="85"/></g>
+          <polyline points="0,95 40,80 80,88 120,60 160,72 200,40 240,52 280,22 520,22" fill="none" stroke="#ddd" stroke-width="4" stroke-dasharray="6 6"/>
+          <polyline class="line" points="0,20 520,20" fill="none" stroke="#2FB59A" stroke-width="7" stroke-linecap="round"/>
+          <text x="6" y="106" font-family="Fredoka" font-size="12" fill="#999">market</text>
+          <text x="440" y="14" font-family="Fredoka" font-weight="700" font-size="12" fill="#2FB59A">uncle</text>
+        </svg>
+        <div class="foot"><span>chill since 2021</span><span>volatility: 0%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt">
+    <div class="lbl"><b>4</b>Fake reviews <small>prueba social en broma</small></div>
+    <div class="stub"><h4>Inventory</h4><div class="slots"><i>🥼</i><i>❤️</i><i>🔗</i><i>🍾</i><i>🥞</i></div></div>
+    <div class="stage">
+      <div class="revs">
+        <div class="rev"><div class="st">★★★★★</div><p>"Best uncle. Gave me pancakes and alpha."</p><div class="who"><i>🐣</i><span>nephew<small>verified nephew</small></span></div></div>
+        <div class="rev"><div class="st">★★★★★</div><p>"He never sold. Not even his bathrobe."</p><div class="who"><i>🦄</i><span>anon holder<small>since day 1</small></span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt">
+    <div class="lbl"><b>5</b>Days without selling <small>letrero de fábrica</small></div>
+    <div class="stub"><h4>Inventory</h4><div class="slots"><i>🥼</i><i>❤️</i><i>🔗</i><i>🍾</i><i>🥞</i></div></div>
+    <div class="stage">
+      <div class="days">
+        <div class="t1">THIS UNCLE HAS GONE</div>
+        <div class="num" id="days"></div>
+        <div class="t1">DAYS WITHOUT SELLING</div>
+        <div class="t2">and counting. he forgot his password.</div>
+        <span class="rec">NEW RECORD</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // the counter goes up by one every real day
+  const start = new Date('2023-01-17'), n = Math.floor((Date.now() - start) / 864e5);
+  document.getElementById('days').innerHTML = String(n).padStart(4, '0').split('').map(d => `<span>${d}</span>`).join('');
+  document.querySelectorAll('.quest li:not(.fail)').forEach(li => li.onclick = () => li.classList.toggle('done'));
+</script>
+</body>
+</html>

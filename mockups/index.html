@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>$UNCLE · Maquetas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Fredoka', sans-serif; background: #FFF4E2; color: #1B1B1F; padding: 3rem 1.5rem; }
+  h1 { font-family: 'Bungee'; font-size: clamp(2rem, 5vw, 3.4rem); text-align: center; }
+  .intro { text-align: center; font-size: 1.15rem; margin: .8rem auto 2.5rem; max-width: 46rem; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.8rem; max-width: 1300px; margin: 0 auto; }
+  .card { border: 4px solid #1B1B1F; border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 8px 8px 0 #1B1B1F; transition: .15s; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .card:hover { transform: translate(-3px,-3px) rotate(-.6deg); box-shadow: 12px 12px 0 #1B1B1F; }
+  .frame { height: 340px; overflow: hidden; border-bottom: 4px solid #1B1B1F; position: relative; }
+  .frame iframe { width: 1440px; height: 1300px; border: 0; transform: scale(.27); transform-origin: 0 0; pointer-events: none; }
+  .body { padding: 1.2rem 1.3rem 1.4rem; }
+  .body h2 { font-family: 'Bungee'; font-size: 1.35rem; }
+  .body p { margin: .4rem 0 .9rem; }
+  .sw { display: flex; gap: .4rem; }
+  .sw span { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #1B1B1F; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; max-width: 520px; } .frame iframe { transform: scale(.33); } }
+</style>
+</head>
+<body>
+  <h1>$UNCLE · 3 direcciones</h1>
+  <p class="intro">Misma estructura y contenido, tres personalidades distintas. Haz clic en una para verla completa — todas tienen copia de CA con confeti, hovers y animaciones.</p>
+  <div class="grid">
+    <a class="card" href="a-pastel-pop.html">
+      <div class="frame"><iframe src="a-pastel-pop.html" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="body">
+        <h2>A · Pastel Pop</h2>
+        <p>Neo-brutalista tipo sticker: bordes gruesos, sombras duras, colores pastel subidos de saturación. La evolución más directa de lo que ya tienes.</p>
+        <div class="sw"><span style="background:#FF5FA2"></span><span style="background:#2FD9BE"></span><span style="background:#FFD23F"></span><span style="background:#A98BFF"></span><span style="background:#6EC8FF"></span></div>
+      </div>
+    </a>
+    <a class="card" href="b-sunset-tv.html">
+      <div class="frame"><iframe src="b-sunset-tv.html" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="body">
+        <h2>B · Sunset TV</h2>
+        <p>Noche retro-synthwave: sol a rayas, piso de grilla animado y la TV del hero con perillas que cambian de canal. Más "evento", más brillo.</p>
+        <div class="sw"><span style="background:#1E0B3A"></span><span style="background:#FF3FA4"></span><span style="background:#FF8A3D"></span><span style="background:#FFD84A"></span><span style="background:#3BF5D0"></span></div>
+      </div>
+    </a>
+    <a class="card" href="c-heart-pajamas.html">
+      <div class="frame"><iframe src="c-heart-pajamas.html" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="body">
+        <h2>C · Heart Pajamas</h2>
+        <p>Construida desde el vestuario de Uncle: patrón de corazones del pijama, placa de cadena dorada para el CA, tokenomics en forma de corazón.</p>
+        <div class="sw"><span style="background:#EF3B36"></span><span style="background:#F6C431"></span><span style="background:#8FE3D1"></span><span style="background:#FF9EC1"></span><span style="background:#FFF6E6"></span></div>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uncle Rig Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2A1A14; --cream: #FFF6E6; --red: #EF3B36; --gold: #F6C431; --mint: #A3CFC2; --pink: #FF9EC1; --bg: #120d10; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; background: var(--bg); color: var(--cream); font-family: 'Fredoka', sans-serif; }
+  .app { display: grid; grid-template-columns: 1fr 300px; gap: 18px; padding: 16px; max-width: 1500px; margin: 0 auto; align-items: start; }
+  h1 { grid-column: 1 / -1; font-family: 'Bungee'; font-weight: 400; font-size: 1.3rem; }
+  h1 span { color: var(--gold); }
+  .screen { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px; box-shadow: 0 0 0 4px var(--ink), 0 0 0 7px #3a2a30; background: #000; }
+  #stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; }
+  #stage svg#set, #stage svg#front { position: absolute; inset: 0; width: 1280px; height: 720px; }
+  #cam { position: absolute; inset: 0; transform-origin: 0 0; }
+  .rig { position: absolute; left: 0; top: 0; width: 326px; height: 500px; transform-origin: 0 0; }
+  .rig .part { position: absolute; inset: 0; }
+  .rig img, .rig svg { position: absolute; inset: 0; width: 326px; height: 500px; }
+  #body { transform-origin: 163px 500px; }
+  #head { transform-origin: 190px 255px; }
+  #subs { position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; padding: 0 120px; pointer-events: none; }
+  #subs span { display: inline-block; font-weight: 600; font-size: 34px; color: #fff; text-shadow: 0 0 2px #000, 0 2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000, 0 3px 10px rgba(0,0,0,.8); }
+  #subs span.n { color: #C8F0E6; font-style: italic; }
+  #subs em { font-style: normal; font-size: 22px; letter-spacing: .08em; display: block; opacity: .85; }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,.3) 100%); }
+
+  .panel { background: #1e1519; border: 3px solid #000; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .panel h2 { font-family: 'Bungee'; font-weight: 400; font-size: .95rem; color: var(--gold); }
+  .panel p { font-size: .9rem; opacity: .75; line-height: 1.35; }
+  .btn { font: 700 15px 'Fredoka'; color: var(--ink); background: var(--cream); border: 3px solid var(--ink); border-radius: 12px; padding: 10px 12px; cursor: pointer; box-shadow: 3px 3px 0 #000; text-align: left; width: 100%; }
+  .btn.main { background: var(--gold); font-size: 17px; }
+  .btn.on { background: var(--red); color: #fff; }
+  .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+  select { width: 100%; font: 500 14px 'Fredoka'; padding: 8px; border-radius: 10px; border: 2px solid #000; background: var(--cream); color: var(--ink); }
+  label.sl { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: center; font-size: .85rem; }
+  .row { display: flex; flex-direction: column; gap: 8px; }
+  @media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>UNCLE <span>· prueba de animación</span></h1>
+
+  <div class="screen" id="screen">
+    <div id="stage">
+      <div id="cam">
+        <svg viewBox="0 0 1280 720" id="set"></svg>
+        <div class="rig" id="rig">
+          <div class="part" id="body"><img src="episodio-assets/rig-body.png" alt=""></div>
+          <div class="part" id="head">
+            <img src="episodio-assets/rig-head.png" alt="">
+            <svg viewBox="0 0 326 500">
+              <defs>
+                <clipPath id="eyeL"><ellipse cx="87" cy="132.5" rx="14.5" ry="9.5"/></clipPath>
+                <clipPath id="eyeR"><ellipse cx="145" cy="131" rx="22" ry="10.5"/></clipPath>
+                <clipPath id="mouthClip"><path id="mouthShape" d=""/></clipPath>
+              </defs>
+              <!-- eyelids: skin that slides down over each eye, with the lash line on its edge -->
+              <g clip-path="url(#eyeL)"><rect id="lidL" x="66" y="120" width="40" height="0" fill="#F2E3BF"/></g>
+              <g clip-path="url(#eyeR)"><rect id="lidR" x="120" y="119" width="52" height="0" fill="#F2E3BF"/></g>
+              <path id="lashL" d="" fill="none" stroke="#2A1A14" stroke-width="3.2" stroke-linecap="round"/>
+              <path id="lashR" d="" fill="none" stroke="#2A1A14" stroke-width="3.2" stroke-linecap="round"/>
+              <!-- mouth -->
+              <g id="mouth">
+                <path id="mouthFill" d="" fill="#4a1d22"/>
+                <g clip-path="url(#mouthClip)"><ellipse id="tongue" cx="98" cy="226" rx="15" ry="7" fill="#E8848F"/></g>
+                <path id="mouthLine" d="" fill="none" stroke="#2A1A14" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <svg viewBox="0 0 1280 720" id="front" style="position:absolute;inset:0;pointer-events:none"></svg>
+      </div>
+      <div id="subs"></div>
+      <div id="vig"></div>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="row">
+      <h2>Escena</h2>
+      <button class="btn main" id="play">▶ Reproducir escena</button>
+      <select id="voice" title="Voz"></select>
+      <p>Usa la voz del navegador, que suena robótica. Sirve para ver la sincronía de labios; la voz final debería ser grabada.</p>
+    </div>
+    <div class="row">
+      <h2>Tu voz</h2>
+      <button class="btn" id="mic">🎙 Hablar por el micrófono</button>
+      <button class="btn" id="file">📁 Subir un audio (mp3, wav, m4a)</button>
+      <input type="file" id="fileIn" accept="audio/*" hidden>
+      <p>Habla o sube una grabación y Uncle mueve la boca y la cabeza con tu voz.</p>
+    </div>
+    <div class="row">
+      <h2>Marioneta</h2>
+      <label class="sl">Párpados <input type="range" id="slLid" min="0" max="1" step=".01" value="0"></label>
+      <label class="sl">Boca <input type="range" id="slMouth" min="0" max="1" step=".01" value="0"></label>
+      <label class="sl">Cabeza <input type="range" id="slTilt" min="-4" max="4" step=".1" value="0"></label>
+      <button class="btn" id="reset">Soltar marioneta</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const INK = '#2A1A14';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+
+/* ---------- set: same kitchen wall as the episode, plus a counter in front ---------- */
+$('#set').innerHTML = `
+  <defs><pattern id="hp" width="70" height="70" patternUnits="userSpaceOnUse"><path d="M35 50 C 22 41 18 34 22 29 C 26 24 32 25 35 30 C 38 25 44 24 48 29 C 52 34 48 41 35 50 Z" fill="#F0CFA0" opacity=".75"/></pattern>
+  <linearGradient id="ws" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd0f2"/><stop offset="1" stop-color="#cfeefc"/></linearGradient></defs>
+  <rect width="1280" height="720" fill="#F9E3BD"/><rect width="1280" height="560" fill="url(#hp)"/>
+  <rect x="40" y="90" width="300" height="320" fill="url(#ws)"/>
+  <g fill="#fff" stroke="${INK}" stroke-width="4"><path d="M90 190 a26 26 0 0 1 46 -14 a30 30 0 0 1 54 10 a22 22 0 0 1 4 40 h-100 a20 20 0 0 1 -4 -36z"/></g>
+  <circle cx="290" cy="140" r="26" fill="#ffe27a" stroke="${INK}" stroke-width="4"/>
+  <rect x="40" y="90" width="300" height="320" fill="none" stroke="#fffaf0" stroke-width="16"/><rect x="32" y="82" width="316" height="336" fill="none" stroke="${INK}" stroke-width="5"/>
+  <line x1="190" y1="90" x2="190" y2="410" stroke="#fffaf0" stroke-width="10"/><line x1="190" y1="90" x2="190" y2="410" stroke="${INK}" stroke-width="3"/>
+  <rect x="20" y="60" width="340" height="40" rx="6" fill="#EF3B36" stroke="${INK}" stroke-width="5"/>
+  <rect x="24" y="410" width="332" height="20" fill="#fffaf0" stroke="${INK}" stroke-width="5"/>
+  <g transform="rotate(-2 1070 200)"><rect x="960" y="110" width="220" height="180" rx="6" fill="#F6C431" stroke="${INK}" stroke-width="6"/><rect x="978" y="128" width="184" height="144" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
+    <text x="1070" y="180" text-anchor="middle" font-family="Caveat" font-size="34" fill="#EF3B36">Live · Laugh</text>
+    <text x="1070" y="232" text-anchor="middle" font-family="Bungee" font-size="40" fill="${INK}">HODL</text></g>
+  <rect x="0" y="560" width="1280" height="160" fill="#A3CFC2"/><rect x="0" y="550" width="1280" height="16" fill="#fffaf0" stroke="${INK}" stroke-width="5"/>`;
+$('#front').innerHTML = `
+  <rect x="-10" y="694" width="1300" height="60" fill="#EF3B36" stroke="${INK}" stroke-width="6"/>
+  <rect x="-10" y="676" width="1300" height="24" rx="6" fill="#FFF6E6" stroke="${INK}" stroke-width="6"/>`;
+
+/* ---------- rig placement ---------- */
+const RIG = { x: 384, y: 22, s: 1.8 };
+$('#rig').style.transform = `translate(${RIG.x}px, ${RIG.y}px) scale(${RIG.s})`;
+
+/* ---------- face parts ---------- */
+// eye boxes in source-image pixels: top = upper lash line, bot = lower edge of the eye
+const EYES = {
+  L: { x0: 70, x1: 102, top: 123, bot: 141, lid: $('#lidL'), lash: $('#lashL') },
+  R: { x0: 124, x1: 167, top: 121, bot: 140, lid: $('#lidR'), lash: $('#lashR') },
+};
+function setLids(c) { // 0 open … 1 shut
+  for (const e of Object.values(EYES)) {
+    const y = lerp(e.top, e.bot, c);
+    e.lid.setAttribute('y', e.top + 1.5); e.lid.setAttribute('height', Math.max(0, y - e.top - 1.5));
+    const sag = lerp(-1, 3, c);
+    e.lash.setAttribute('d', c < .06 ? '' : `M${e.x0 + 1} ${e.top + 3} Q ${(e.x0 + e.x1) / 2} ${e.top - 3} ${e.x1 - 1} ${e.top + 2} M${e.x0 + 2} ${y - 1} Q ${(e.x0 + e.x1) / 2} ${y + sag} ${e.x1 - 2} ${y - 1}`);
+  }
+}
+// mouth hangs from the bottom line of the snout, opening down into the beard
+function setMouth(open, wide = .5) {
+  if (open < .04) { $('#mouthFill').setAttribute('d', ''); $('#mouthLine').setAttribute('d', ''); $('#mouthShape').setAttribute('d', ''); $('#tongue').style.display = 'none'; return; }
+  const cx = 97, top = 207, hw = lerp(15, 24, wide) + open * 3, h = 4 + open * 17;
+  const d = `M${cx - hw} ${top} Q ${cx} ${top + 5} ${cx + hw} ${top - 1} Q ${cx + hw * .7} ${top + h} ${cx} ${top + h + 2} Q ${cx - hw * .8} ${top + h} ${cx - hw} ${top} Z`;
+  $('#mouthFill').setAttribute('d', d); $('#mouthLine').setAttribute('d', d); $('#mouthShape').setAttribute('d', d);
+  const tg = $('#tongue'); tg.style.display = ''; tg.setAttribute('cy', top + h + 1); tg.setAttribute('rx', hw * .6);
+}
+
+/* ---------- animation state ---------- */
+const st = {
+  mouth: 0, mouthT: 0, wide: .5,            // current / target opening
+  lidBase: 0, blink: 0, nextBlink: 1.5,      // resting droop + blink
+  tilt: 0, tiltT: 0, nod: 0, nodT: 0,        // head roll and vertical nod
+  lean: 0, leanT: 0,
+  puppet: null,
+};
+function blink(long = false) { st.blinkStart = performance.now() / 1000; st.blinkLen = long ? .7 : .17; }
+
+let last = performance.now();
+function frame(now) {
+  const t = now / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
+  // audio-driven mouth (mic / file)
+  if (analyser) {
+    analyser.getFloatTimeDomainData(abuf);
+    let rms = 0; for (const v of abuf) rms += v * v; rms = Math.sqrt(rms / abuf.length);
+    const lvl = clamp((rms - .012) * 9, 0, 1);
+    st.mouthT = lvl; st.wide = .4 + lvl * .4;
+    if (lvl > .55 && t - (st.lastNod || 0) > .35) { st.nodT = 1; st.lastNod = t; }
+  }
+  // speech-synthesis mouth pattern
+  if (sylQueue.length) {
+    const q = sylQueue[0];
+    if (t >= q.end) sylQueue.shift();
+    else if (t >= q.start) { const p = (t - q.start) / (q.end - q.start); st.mouthT = Math.sin(Math.PI * p) * q.amp; st.wide = q.wide; }
+  } else if (!analyser && !speaking) st.mouthT = 0;
+
+  // springs
+  st.mouth = lerp(st.mouth, st.mouthT, 1 - Math.pow(.0001, dt * 2.2));
+  st.nod = lerp(st.nod, st.nodT, 1 - Math.pow(.001, dt)); st.nodT = lerp(st.nodT, 0, 1 - Math.pow(.02, dt));
+  st.tilt = lerp(st.tilt, st.tiltT, 1 - Math.pow(.01, dt));
+  st.lean = lerp(st.lean, st.leanT, 1 - Math.pow(.02, dt));
+
+  // blinks
+  if (t > st.nextBlink) { blink(); st.nextBlink = t + 2.2 + Math.random() * 3.5; if (Math.random() < .2) setTimeout(() => blink(), 260); }
+  let b = 0;
+  if (st.blinkStart) { const p = (t - st.blinkStart) / st.blinkLen; b = p < 0 || p > 1 ? 0 : Math.sin(Math.PI * p); }
+  let lid = clamp(st.lidBase + (1 - st.lidBase) * b, 0, 1);
+
+  // idle life: breathing + slow sway
+  const breath = Math.sin(t * 1.6);
+  let tilt = st.tilt + Math.sin(t * .55) * .9 + Math.sin(t * 1.3) * .3 + st.mouth * Math.sin(t * 9) * .6;
+  let nod = st.nod * 5 + breath * 1.2 - st.mouth * 1.5;
+  let mouth = st.mouth;
+  if (st.puppet) { lid = st.puppet.lid; mouth = st.puppet.mouth; tilt = st.puppet.tilt; }
+
+  $('#body').style.transform = `scaleY(${1 + breath * .006}) translateX(${st.lean * 6}px)`;
+  $('#head').style.transform = `translate(${st.lean * 9}px, ${nod - breath * .6}px) rotate(${tilt}deg)`;
+  setLids(lid); setMouth(mouth, st.wide);
+  $('#cam').style.transform = camT();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- camera (slow push during the scene) ---------- */
+let camZoom = 1, camZoomT = 1;
+function camT() { camZoom = lerp(camZoom, camZoomT, .01); const fx = 640, fy = 300; return `translate(${fx - fx * camZoom}px, ${fy - fy * camZoom}px) scale(${camZoom})`; }
+
+/* ---------- speech synthesis + lip sync ---------- */
+let voices = [], speaking = false, sylQueue = [];
+function loadVoices() {
+  voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  const pref = ['Guy', 'Davis', 'Andrew', 'Christopher', 'Eric', 'Roger', 'Brian', 'David', 'Google UK English Male', 'Daniel'];
+  voices.sort((a, b) => score(b) - score(a));
+  function score(v) { const i = pref.findIndex(p => v.name.includes(p)); return (i < 0 ? 0 : 50 - i) + (/Online|Natural/.test(v.name) ? 20 : 0); }
+  $('#voice').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('') || '<option>Sin voces en inglés</option>';
+}
+speechSynthesis.onvoiceschanged = loadVoices; loadVoices();
+
+const syllables = w => Math.max(1, (w.toLowerCase().replace(/[^a-z]/g, '').replace(/e$/, '').match(/[aeiouy]+/g) || []).length);
+const WIDE = w => /[ei]/.test(w) ? .8 : /[ou]/.test(w) ? .15 : .5;
+function queueWord(word, rate) {
+  const t0 = performance.now() / 1000, n = syllables(word), per = .2 / rate;
+  const vow = word.toLowerCase().match(/[aeiouy]+/g) || ['a'];
+  for (let i = 0; i < n; i++) sylQueue.push({ start: t0 + i * per, end: t0 + (i + .9) * per, amp: .55 + Math.random() * .4, wide: WIDE(vow[i] || 'a') });
+  if (/[!?]|pancakes|still|here|utility/i.test(word)) st.nodT = 1;
+}
+function say(text, { rate = .86, pitch = .62, who = 'U' } = {}) {
+  return new Promise(res => {
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voices[+$('#voice').value]; if (v) u.voice = v;
+    u.rate = rate; u.pitch = who === 'N' ? 1.15 : pitch; u.lang = 'en-US';
+    let gotBoundary = false, fallback;
+    u.onstart = () => {
+      speaking = who === 'U';
+      // if this voice never reports word boundaries, flap through the words on a timer
+      fallback = setTimeout(() => { if (!gotBoundary && who === 'U') text.split(/\s+/).forEach((w, i) => setTimeout(() => speaking && queueWord(w, rate), i * 330 / rate)); }, 250);
+    };
+    u.onboundary = e => { if (e.name !== 'word' || who !== 'U') return; gotBoundary = true; queueWord(text.slice(e.charIndex).split(/\s+/)[0], rate); };
+    u.onend = u.onerror = () => { clearTimeout(fallback); speaking = false; sylQueue = []; res(); };
+    speechSynthesis.speak(u);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function sub(text, who) { $('#subs').innerHTML = !text ? '' : who === 'N' ? `<span class="n"><em>NEPHEW (O.S.)</em>${text}</span>` : `<span>${text}</span>`; }
+
+let running = false;
+async function scene() {
+  if (running) return; running = true; speechSynthesis.cancel(); stopAudio(); release();
+  $('#play').textContent = '… reproduciendo';
+  camZoom = camZoomT = 1;
+  st.lidBase = .15; st.tiltT = 0; st.leanT = 0;
+  await wait(600);
+  sub("Okay, but what's the utility?", 'N');
+  st.tiltT = -2; // turns an ear to it
+  await say("Okay, but what's the utility?", { who: 'N', rate: 1.05 });
+  sub(''); await wait(350);
+  blink(true); st.lidBase = .3; await wait(900);           // slow, unimpressed blink
+  sub('The utility?'); st.tiltT = 2.5; st.leanT = -.6;
+  await say('The utility?', { rate: .8 });
+  sub(''); await wait(500);
+  st.tiltT = 0; st.leanT = .4; camZoomT = 1.12;
+  sub('The utility is pancakes.');
+  await say('The utility is pancakes.', { rate: .86 });
+  sub(''); st.nodT = 1.4; await wait(1100);
+  blink(true); st.lidBase = .45; st.leanT = 0; camZoomT = 1.3; await wait(1400); // the BoJack pause
+  st.tiltT = -1.2;
+  sub("The utility is I'm still here.");
+  await say("The utility is I'm still here.", { rate: .74, pitch: .55 });
+  sub(''); await wait(1300);
+  blink(true); await wait(800);
+  st.lidBase = .1; st.tiltT = 0; camZoomT = 1;
+  $('#play').textContent = '▶ Reproducir escena'; running = false;
+}
+$('#play').onclick = scene;
+
+/* ---------- mic / audio file lip sync ---------- */
+let AC, analyser = null, abuf, micStream = null, fileSrc = null;
+function ensureAC() { AC = AC || new AudioContext(); if (AC.state === 'suspended') AC.resume(); }
+function makeAnalyser() { analyser = AC.createAnalyser(); analyser.fftSize = 1024; abuf = new Float32Array(analyser.fftSize); return analyser; }
+function stopAudio() {
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (fileSrc) { try { fileSrc.stop(); } catch (e) {} fileSrc = null; }
+  analyser = null; st.mouthT = 0; $('#mic').classList.remove('on'); $('#mic').textContent = '🎙 Hablar por el micrófono';
+}
+$('#mic').onclick = async () => {
+  if (micStream) return stopAudio();
+  ensureAC(); speechSynthesis.cancel();
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    AC.createMediaStreamSource(micStream).connect(makeAnalyser());
+    $('#mic').classList.add('on'); $('#mic').textContent = '■ Parar micrófono'; st.lidBase = .15;
+  } catch (e) { alert('No se pudo abrir el micrófono: ' + e.message); }
+};
+$('#file').onclick = () => $('#fileIn').click();
+$('#fileIn').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  stopAudio(); ensureAC(); speechSynthesis.cancel();
+  const buf = await AC.decodeAudioData(await f.arrayBuffer());
+  fileSrc = AC.createBufferSource(); fileSrc.buffer = buf;
+  const a = makeAnalyser(); fileSrc.connect(a); a.connect(AC.destination);
+  fileSrc.onended = stopAudio; fileSrc.start(); st.lidBase = .15;
+  e.target.value = '';
+};
+
+/* ---------- puppet sliders ---------- */
+function grab() { st.puppet = { lid: +$('#slLid').value, mouth: +$('#slMouth').value, tilt: +$('#slTilt').value }; }
+['#slLid', '#slMouth', '#slTilt'].forEach(id => $(id).oninput = grab);
+function release() { st.puppet = null; $('#slLid').value = 0; $('#slMouth').value = 0; $('#slTilt').value = 0; }
+$('#reset').onclick = release;
+
+/* ---------- fit ---------- */
+function fit() { const r = $('#screen').getBoundingClientRect(), s = Math.min(r.width / 1280, r.height / 720); $('#stage').style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+// ?pose=lid,mouth,tilt freezes the puppet (for checking shapes)
+const qp = new URLSearchParams(location.search).get('pose');
+if (qp) { const [l, m, tl] = qp.split(',').map(Number); st.puppet = { lid: l, mouth: m, tilt: tl }; }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
